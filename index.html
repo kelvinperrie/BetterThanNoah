@@ -1,0 +1,222 @@
+<!doctype html>
+<html lang="en" ng-app="boatApp">
+  <head>
+    <meta charset="utf-8">
+    <title>My HTML File</title>
+    <script src="scripts/angular.js"></script>
+    <style>
+        body {
+            font-family: tahoma;
+        }
+        .passenger {
+            position: absolute;
+            z-index: 100;
+            width: 40px;
+            height: 40px;
+            border: 1px solid #000;
+            background-color: #fff;
+        }
+        #the-boat, #not-the-boat {
+            display: inline-block;
+            position: relative;
+            width: 300px;
+            height: 600px;
+            background-color: grey; 
+        }
+        .all-stuff {
+            background-image: url("images/background.png");
+            position: relative;
+            width: 800px;
+            height: 600px;
+            margin: auto;
+        }
+        .passenger .description {
+            opacity: 0;
+            font-size: 12px;
+            line-height: 12px;
+            display: block;
+            background-color: #d1eaff;
+            min-height: 40px;
+            cursor: pointer;
+            text-align: center;
+        }
+
+        .passenger:hover .description {
+            opacity: 1;
+        }
+        .feedback {
+            background-color: rgba(255, 255, 255, 0.5);
+            width: 800px;
+            height: 600px;
+            z-index: 2000;
+            position: absolute;
+        }
+        .instructions {
+            position: absolute;
+            width: 800px;
+            height: 600px;
+            z-index: 2000;
+            top:0;
+            margin: auto;
+            background-color: rgba(255, 255, 255, 0.5);
+        }
+        .instructions span {
+            position: absolute;
+            font-size: 30px;
+        }
+        .intro-1 {
+            top: 20px;
+            left: 50px;
+        }
+        .intro-2 {
+            top: 400px;
+            left: 50px;
+        }
+        .start-trigger {
+            top: 500px;
+            left: 50px;
+        }
+        .ark-label {
+            top: 180px;
+            left: 50px;
+        }
+        .beach-label {
+            top: 280px;
+            left: 450px;
+        }
+        .end-trigger, .retry-trigger {
+            position: absolute;
+            top: 550px;
+            left: 300px;
+            font-size: 30px;
+        }
+        .trigger {
+            cursor: pointer;
+            text-decoration: underline;
+        }
+    </style>
+  </head>
+  <body ng-controller="EverythingController">
+
+    <div class="all-stuff">
+        <div ng-show="instructionsVisible" class="instructions">
+            <span class="intro-1">OK, are you a cool enough dude to pack the ark better than Noah?</span>
+            <span class="intro-2">Your job is to click on the potential passengers to put them on the Ark.</span>
+            <span class="ark-label">Over here is the Ark (it's a boat)</span>
+            <span class="beach-label">This over here is everyone not on the Ark</span>
+            <span class="start-trigger trigger" ng-click="startGame()">ok, please start already</span>
+        </div>
+        <div ng-repeat="passenger in passengers" ng-click="togglePassengerLocation(passenger)" style="background-image: url('images/{{passenger.image}}');top: {{passenger.top}}px; left: {{passenger.left}}px;" class="passenger">
+            <span class="description">{{passenger.description}}</span>
+        </div>
+        <div class="end-trigger trigger" ng-hide="instructionsVisible || feedbackVisible" ng-click="SetSail()">I'm done, set sail!</div>
+        <div class="feedback" ng-show="feedbackVisible">
+            <div class="response-messages">
+                <ul>
+                    <li class="response-message" ng-repeat="passenger in passengers | filter : {onBoatResponse: '', inBoat: true}">
+                        {{passenger.onBoatResponse}}
+                    </li>
+                </ul>
+                <ul>
+                    <li class="response-message" ng-repeat="passenger in passengers | filter : {offBoatResponse: '', inBoat: '!'+true}">
+                        {{passenger.offBoatResponse}}
+                    </li>
+                </ul>
+                <span class="retry-trigger trigger" ng-click="retry()">Hmmm, can I try again?</span>
+            </div>
+
+        </div>
+    </div>
+
+
+    <script type="text/javascript">
+        function getRandomInt(min, max) {
+            min = Math.ceil(min);
+            max = Math.floor(max);
+            return Math.floor(Math.random() * (max - min + 1)) + min;
+        }
+
+        var boatBoundaries = {
+            minX : 180, maxX : 260, minY : 50, maxY : 500
+        }
+        var outOfBoatBoundaries = {
+            minX : 550, maxX : 750, minY : 50, maxY : 500
+        }
+        var boatApp = angular.module('boatApp', []);
+
+        boatApp.controller('EverythingController', function EverythingController($scope) {
+        
+            $scope.instructionsVisible = true;
+            $scope.feedbackVisible = false;
+            $scope.rating = 0;
+            $scope.SetSail = function() {
+                $scope.feedbackVisible = true;
+            }
+            $scope.togglePassengerLocation = function(passenger) {
+                passenger.inBoat = !passenger.inBoat;
+                GivePassengerRandomLocation(passenger);
+            }
+            $scope.startGame = function() {
+                $scope.instructionsVisible = false;
+            }
+            $scope.retry = function() {
+                $scope.feedbackVisible = false;
+            }
+
+            $scope.passengers = [
+                {
+                    description: "Some T-Rexs",
+                    onBoatResponse: "Mate, you're joking.",
+                    image: "p-trex.png",
+                    rating: -5
+                }, {
+                    description: "Ducks",
+                    offBoatResponse: "Only a monster would exclude the ducks.",
+                    image: "p-ducks.png",
+                    rating: 10
+                }, {
+                    description: "Cows (big beautiful eyes)",
+                    offBoatResponse: "The loss of cows to the future has sadly crippled future New Zealand's entire economy and destined them for extreme poverty and hardship. Thanks.",
+                    image: "p-cows.png",
+                    rating: 10
+                }, {
+                    description: "Pegasus x 2",
+                    onBoatResponse: "Including the Pegasus made the future wild west a whole lot more interesting.",
+                    image: "p-pegasus.png",
+                    rating: -5
+                }, {
+                    description: "Noah and wife",
+                    onBoatResponse: "Noah and wife are pleased to be aboard and immediately descend to the casino deck.",
+                    offBoatResponse: "Noah is mad. SO MAD.",
+                    image: "p-noahandwife.png",
+                    rating: 5
+                }, {
+                    description: "A group of sinners",
+                    onBoatResponse: "The sinners are so happy they repent and start learning to code so they can be productive members of the new society.",
+                    image: "p-sinners.png",
+                    rating: 5
+                }, {
+                    description: "A gameboy colour",
+                    onBoatResponse: "The gameboy colour came with Pokemon Ruby! Score! The future is looking bright.",
+                    image: "p-gameboycolour.png",
+                    rating: 5
+                }
+            ];
+
+            // initialize the passengers in random locations within the 'off the boat' area
+            for(var i = 0; i < $scope.passengers.length; i++) {
+                GivePassengerRandomLocation($scope.passengers[i]);
+            }
+
+            function GivePassengerRandomLocation(passenger) {
+                var boundaries = outOfBoatBoundaries;
+                if(passenger.inBoat) {
+                    boundaries = boatBoundaries;
+                }
+                passenger.top = getRandomInt(boundaries.minY, boundaries.maxY);
+                passenger.left = getRandomInt(boundaries.minX, boundaries.maxX);
+            }
+        });
+    </script>
+  </body>
+</html>
