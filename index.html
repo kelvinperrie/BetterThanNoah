@@ -50,6 +50,7 @@
             height: 600px;
             z-index: 2000;
             position: absolute;
+            padding: 20px;
         }
         .instructions {
             position: absolute;
@@ -94,6 +95,33 @@
             cursor: pointer;
             text-decoration: underline;
         }
+        .response-message {
+            border: 1px solid #909090;
+        }
+        .response-messages div {
+            display: inline-block;
+            background-color: #d1eaff;
+            vertical-align: top;
+            padding: 1px;
+            opacity: .9;
+        }
+        .response-rating {
+            width: 30px;
+        }
+        .response-description {
+            width: 200px;
+        }
+        .response-response {
+            width: 450px;
+        }
+        div.response-good {
+            background-color: #0f0;
+            color: #fff;
+        }
+        div.response-bad {
+            background-color: #f00;
+            color: #fff;
+        }
     </style>
   </head>
   <body ng-controller="EverythingController">
@@ -101,7 +129,7 @@
     <div class="all-stuff">
         <div ng-show="instructionsVisible" class="instructions">
             <span class="intro-1">OK, are you a cool enough dude to pack the ark better than Noah?</span>
-            <span class="intro-2">Your job is to click on the potential passengers to put them on the Ark.</span>
+            <span class="intro-2">Your job is to click on the potential passengers to move the ones that you think should be on the Ark.</span>
             <span class="ark-label">Over here is the Ark (it's a boat)</span>
             <span class="beach-label">This over here is everyone not on the Ark</span>
             <span class="start-trigger trigger" ng-click="startGame()">ok, please start already</span>
@@ -111,8 +139,27 @@
         </div>
         <div class="end-trigger trigger" ng-hide="instructionsVisible || feedbackVisible" ng-click="SetSail()">I'm done, set sail!</div>
         <div class="feedback" ng-show="feedbackVisible">
+            Well my friend, I don't want to be too judgy, but here's how you did.<br/>
+            You put these folk on the Ark:<br/>
             <div class="response-messages">
-                <ul>
+                <div class="response-message" ng-repeat="passenger in passengers | filter : {inBoat: true}">
+                    <div class="response-rating response-good" ng-show="passenger.rating >= 0">{{passenger.rating}}</div>
+                    <div class="response-rating response-bad" ng-show="passenger.rating < 0">{{passenger.rating}}</div>
+                    <div class="response-description">{{passenger.description}}</div>
+                    <div class="response-response">{{passenger.onBoatResponse}}</div>
+                </div>
+            </div>
+            You left these folk behind:<br/>
+            <div class="response-messages">
+                <div class="response-message" ng-repeat="passenger in passengers | filter : {inBoat: '!'+true}">
+                    <div class="response-rating response-good" ng-show="passenger.rating * -1 >= 0">{{passenger.rating * -1}}</div>
+                    <div class="response-rating response-bad"ng-show="passenger.rating * -1 < 0">{{passenger.rating * -1}}</div>
+                    <div class="response-description">{{passenger.description}}</div>
+                    <div class="response-response">{{passenger.offBoatResponse}}</div>
+                </div>
+            </div>
+
+                <!-- <ul>
                     <li class="response-message" ng-repeat="passenger in passengers | filter : {onBoatResponse: '', inBoat: true}">
                         {{passenger.onBoatResponse}}
                     </li>
@@ -121,10 +168,9 @@
                     <li class="response-message" ng-repeat="passenger in passengers | filter : {offBoatResponse: '', inBoat: '!'+true}">
                         {{passenger.offBoatResponse}}
                     </li>
-                </ul>
+                </ul> -->
                 <span class="retry-trigger trigger" ng-click="retry()">Hmmm, can I try again?</span>
-            </div>
-
+            
         </div>
     </div>
 
@@ -170,6 +216,16 @@
                     image: "p-trex.png",
                     rating: -5
                 }, {
+                    description: "Swans",
+                    onBoatResponse: "",
+                    image: "p-swans.png",
+                    rating: 5
+                }, {
+                    description: "Frogs",
+                    offBoatResponse: "Where's my frog?",
+                    image: "p-frogs.png",
+                    rating: 5
+                }, {
                     description: "Ducks",
                     offBoatResponse: "Only a monster would exclude the ducks.",
                     image: "p-ducks.png",
@@ -200,10 +256,40 @@
                     onBoatResponse: "The gameboy colour came with Pokemon Ruby! Score! The future is looking bright.",
                     image: "p-gameboycolour.png",
                     rating: 5
+                }, {
+                    description: "Monkeys",
+                    onBoatResponse: "",
+                    image: "p-monkeys.png",
+                    rating: 5
+                }, {
+                    description: "Triceratops",
+                    onBoatResponse: "I'm sorry, but dinosaurs aren't even real.",
+                    image: "p-triceratops.png",
+                    rating: -5
+                }, {
+                    description: "Macho Man Randy Savage",
+                    offBoatResponse: "A poor way to repay Randy's service to the world of wrestling.",
+                    image: "p-machomanshead.png",
+                    rating: 5
+                }, {
+                    description: "Pigs",
+                    onBoatResponse: "We have to bring them, but given the chance they'll eat you.",
+                    image: "p-pigs.png",
+                    rating: 5
+                }, {
+                    description: "Pigeons aka Doves",
+                    onBoatResponse: "So majestic and beautiful.",
+                    image: "p-pigeons.png",
+                    rating: 5
+                }, {
+                    description: "Geese",
+                    onBoatResponse: "Geese, also known as 'Satan's Sparrows' but sure, why not, bring them along.",
+                    image: "p-geese.png",
+                    rating: 5
                 }
             ];
 
-            // initialize the passengers in random locations within the 'off the boat' area
+            // initialize the passengers in random locations
             for(var i = 0; i < $scope.passengers.length; i++) {
                 GivePassengerRandomLocation($scope.passengers[i]);
             }
