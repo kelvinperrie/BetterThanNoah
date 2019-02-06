@@ -122,6 +122,9 @@
             background-color: #f00;
             color: #fff;
         }
+        .rating {
+
+        }
     </style>
   </head>
   <body ng-controller="EverythingController">
@@ -137,20 +140,19 @@
         <div ng-repeat="passenger in passengers" ng-click="togglePassengerLocation(passenger)" style="background-image: url('images/{{passenger.image}}');top: {{passenger.top}}px; left: {{passenger.left}}px;" class="passenger">
             <span class="description">{{passenger.description}}</span>
         </div>
-        <div class="end-trigger trigger" ng-hide="instructionsVisible || feedbackVisible" ng-click="SetSail()">I'm done, set sail!</div>
+        <div class="end-trigger trigger" ng-hide="instructionsVisible || feedbackVisible" ng-click="setSail()">I'm done, set sail!</div>
         <div class="feedback" ng-show="feedbackVisible">
             Well my friend, I don't want to be too judgy, but here's how you did.<br/>
-            You put these folk on the Ark:<br/>
+            <div class="rating">Rating: {{rating()}}</div>
             <div class="response-messages">
+                You put these folk on the Ark:<br/>
                 <div class="response-message" ng-repeat="passenger in passengers | filter : {inBoat: true}">
                     <div class="response-rating response-good" ng-show="passenger.rating >= 0">{{passenger.rating}}</div>
                     <div class="response-rating response-bad" ng-show="passenger.rating < 0">{{passenger.rating}}</div>
                     <div class="response-description">{{passenger.description}}</div>
                     <div class="response-response">{{passenger.onBoatResponse}}</div>
-                </div>
-            </div>
-            You left these folk behind:<br/>
-            <div class="response-messages">
+                </div><br/>
+                You left these folk behind:<br/>
                 <div class="response-message" ng-repeat="passenger in passengers | filter : {inBoat: '!'+true}">
                     <div class="response-rating response-good" ng-show="passenger.rating * -1 >= 0">{{passenger.rating * -1}}</div>
                     <div class="response-rating response-bad"ng-show="passenger.rating * -1 < 0">{{passenger.rating * -1}}</div>
@@ -159,17 +161,7 @@
                 </div>
             </div>
 
-                <!-- <ul>
-                    <li class="response-message" ng-repeat="passenger in passengers | filter : {onBoatResponse: '', inBoat: true}">
-                        {{passenger.onBoatResponse}}
-                    </li>
-                </ul>
-                <ul>
-                    <li class="response-message" ng-repeat="passenger in passengers | filter : {offBoatResponse: '', inBoat: '!'+true}">
-                        {{passenger.offBoatResponse}}
-                    </li>
-                </ul> -->
-                <span class="retry-trigger trigger" ng-click="retry()">Hmmm, can I try again?</span>
+            <span class="retry-trigger trigger" ng-click="retry()">Hmmm, can I try again?</span>
             
         </div>
     </div>
@@ -195,7 +187,7 @@
             $scope.instructionsVisible = true;
             $scope.feedbackVisible = false;
             $scope.rating = 0;
-            $scope.SetSail = function() {
+            $scope.setSail = function() {
                 $scope.feedbackVisible = true;
             }
             $scope.togglePassengerLocation = function(passenger) {
@@ -207,6 +199,13 @@
             }
             $scope.retry = function() {
                 $scope.feedbackVisible = false;
+            }
+            $scope.rating = function() {
+                var total = 0;
+                for(var i = 0; i < $scope.passengers.length; i++) {
+                    total = total + ($scope.passengers[i].inBoat ? $scope.passengers[i].rating : $scope.passengers[i].rating * -1);
+                }
+                return total;
             }
 
             $scope.passengers = [
@@ -283,9 +282,19 @@
                     rating: 5
                 }, {
                     description: "Geese",
-                    onBoatResponse: "Geese, also known as 'Satan's Sparrows' but sure, why not, bring them along.",
+                    onBoatResponse: "Geese, also known as 'Satan's Sparrows'. But sure, why not, bring them along.",
                     image: "p-geese.png",
                     rating: 5
+                }, {
+                    description: "Tacos",
+                    onBoatResponse: "",
+                    image: "p-tacos.png",
+                    rating: -5
+                }, {
+                    description: "Squirtle",
+                    onBoatResponse: "Pokemon is really anime",
+                    image: "p-squirtle.png",
+                    rating: -10
                 }
             ];
 
